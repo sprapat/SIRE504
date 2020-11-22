@@ -1,7 +1,9 @@
 17 Nov 2020
 
 # LINUX And Python Exercise
-----------------
+
+> Credit
+> indian_food.csv is a dataset from Kaggle.
 
 ## Objective for linux part
 After this course, the student should be able to
@@ -13,7 +15,8 @@ After this course, the student should be able to
 * use text utility commands
 * use pipe
 
-## You can use any linux commands or python scripts to do the task 1-23.
+> You can use any linux commands or python scripts to do the task 1-23.
+
 ## Tasks
 1. Create a new virtual machine (VM) at DigitalOcean
 2. Copy file exercise_20201117.tar.gz from medbif server (directory /home/medbif/20201117) to your home directory of your new VM. This is your original source file and we won't working directly on this file. We'll copy and work in a working directory.

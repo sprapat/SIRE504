@@ -222,29 +222,224 @@ sed 's/-1/NA/g' indian_food.csv > indian_food_na.csv
 
 ## Python script part (The following tasks are required to write in Python.)
 24. Create a director named *python* inside your *working* directory and put all python scripts here.
+````console
+mkdir python
+````
+
 ### Name python script based on the assigned task i.e. task_24.py
 25. Write a python script to count the number of lines of a text file. i.e. running this command should display the number of lines of indian_food.csv - python3 task_25.py indian_food.csv
+> This is a small script. We can use nano editor to create the script i.e. nano python/task_25.py
+This version is ok for a small file but **not** ok for a large file because the script reads all data into the memory.
+````python
+import sys
+
+# get filename from the command line
+filename = sys.argv[1]
+
+# read all contents into data
+data = open(filename).readlines()
+# print number of lines
+print(len(data))
+````
+Test the script. (Please make sure we are in working directory and we put the correct path for python script.)
+````console
+python3 python/task_25.py indian_food.csv
+````
+we get the correct result.
+````console
+256
+````
+
+Better solution that works with all filesizes.
+````python
+import sys
+
+# get filename from the command line
+filename = sys.argv[1]
+
+# read all contents into data
+line_count = 0
+for line in open(filename):
+	line_count += 1
+# print number of lines
+print(line_count)
+````
+
 26. Write a python script to count the number of lines from pipe. i.e. running this command should display the number of lines of indian_food.csv - cat indian_food.csv | python3 task_26.py
+````python
+# For this task, we read from stdin instead of a file.
+import sys
+
+# read all contents into data
+line_count = 0
+for line in sys.stdin:
+	line_count += 1
+# print number of lines
+print(line_count)
+````
+
+Test the script. (Please make sure we are in working directory and we put the correct path for python script.)
+````console
+cat indian_food.csv | python3 python/task_26.py
+````
+we get the correct result.
+````console
+256
+````
 27.Write a python script to display the first 5 lines of a text file. i.e. running this command should display the first 5 lines. python3 task_27.py indian_food.csv
+````python
+import sys
+
+# get filename from the command line
+filename = sys.argv[1]
+
+file_handle = open(filename)
+# We print only the first 5 lines.
+for i in range(5):
+	one_line = file_handle.readline()
+	sys.stdout.write(one_line)
+````
+Or a shorter version.
+````python
+import sys
+file_handle = open(sys.argv[1])
+# We print only the first 5 lines.
+for i in range(5):
+	sys.stdout.write(file_handle.readline())
+````
+
 28. Write a python script to display the first 5 lines from pipe. i.e. running this command should display the first 5 lines. cat indian_food.csv | python3 task_28.py
+````python
+import sys
+
+for i in range(5):
+	sys.stdout.write(sys.stdin.readline())
+````
 29. Write a python script to process data from a indian_food.csv with the following conditions and pipe the result in to a new file names task29_result.csv. (The result file must be csv format.) The running command will be "python3 task29.py indian_food.csv > task29_result.csv".
 * If region value is -1, exclude this row.
 * If region value is not -1, convert values to contain only the first letter of each word ie. East -> E, North East -> NE.
 
-## General information
-Hint: Placing a > at the end of a command, followed by a file name will redirect all output from the command to the file instead of to the screen.
+From this command we used in task 7, we know that region is column 9
+````console
+head -n 1 indian_food.csv | tr , '\n' | nl
+     1  name
+     2  ingredients
+     3  diet
+     4  prep_time
+     5  cook_time
+     6  flavor_profile
+     7  course
+     8  state
+     9  region
+````
 
-Commands you can use to solve the following tasks (for more info, use man <command>):
-* mkdir - create a new directory.
-* rmdir - remove directory
-* cut - Extract on or more columns.
-* head - send the lines at the top of the file to the screen
-* tail - send the lines at the bottom of the file to the screen
-* wc - count words, characters and lines in the file
-* cat - send the full content of the file to the screen
-* cp - create a copy of the file
-* mv - move the file to a new location, or rename the file
-* nano - text editor (search: ctrl-w, replace: ctrl-\, save: ctrl-o, exit: ctrl-x)
-* sort - sort the file according to specified columns
-* uniq - on a sorted file, will remove duplicate lines and can count the removed lines
-* rm - remove files
+First, I write the script this way.
+````python
+import sys
+
+# read data line by line
+for line in open(sys.argv[1]):
+	# strip and split data into each column
+	data = line.strip().split(',')
+	# exclude this line if region value is -1.
+	# please note that I use string of '-1'
+	if data[8]=='-1':
+		continue
+	# replace the region with abbreviated one.
+	# we don't have this function yet.
+	data[8] = convert_value(data[8])
+	# now put all data as comma separated using join command
+	new_line = ','.join(data)
+	# we can use print command instead of sys.stdout.write
+	# because we have already strip the new line.
+	print(new_line)
+````
+
+Now, we have to write convert_value function
+````python
+def convert_value(region):
+	result = ''
+	# we split each word using space.
+	words = region.split(' ')
+	for word in words:
+		# we take only the first character
+		result += word[0]
+	return result
+````
+
+Normally, I will put the convert_value in *google colab* and test that it works correctly.
+Then we put them together to get this code.
+````python
+import sys
+
+def convert_value(region):
+	result = ''
+	# we split each word using space.
+	words = region.split(' ')
+	for word in words:
+		# we take only the first character
+		result += word[0]
+	return result
+
+# read data line by line
+for line in open(sys.argv[1]):
+	# strip and split data into each column
+	data = line.strip().split(',')
+	# exclude this line if region value is -1.
+	# please note that I use string of '-1'
+	if data[8]=='-1':
+		continue
+	# replace the region with abbreviated one.
+	# we don't have this function yet.
+	data[8] = convert_value(data[8])
+	# now put all data as comma separated using join command
+	new_line = ','.join(data)
+	# we can use print command instead of sys.stdout.write
+	# because we have already strip the new line.
+	print(new_line)	
+````
+
+Then when I tested the script, I got this error.
+````console
+...
+:Traceback (most recent call last):
+  File "task_29.py", line 22, in <module>
+    data[8] = convert_value(data[8])
+  File "task_29.py", line 9, in convert_value
+    result += word[0]
+IndexError: string index out of range
+````
+There is a way to check this but it's beyond of the scope of this work.
+But the error message suggests that there is no character in word.
+So I add a guarding clause.
+
+````python
+import sys
+
+def convert_value(region):
+	result = ''
+	# we split each word using space.
+	words = region.split(' ')
+	for word in words:
+		# we take only the first character
+		if len(word)>0:
+			result += word[0]
+	return result
+
+# read data line by line
+for line in open(sys.argv[1]):
+	# strip and split data into each column
+	data = line.strip().split(',')
+	# exclude this line if region value is -1.
+	# please note that I use string of '-1'
+	if data[8]=='-1':
+		continue
+	# replace the region with abbreviated one.
+	# we don't have this function yet.
+	data[8] = convert_value(data[8])
+	# now put all data as comma separated using join command
+	new_line = ','.join(data)
+	# we can use print command instead of sys.stdout.write
+	# because we have already strip the new line.
+	print(new_line)	
+````
